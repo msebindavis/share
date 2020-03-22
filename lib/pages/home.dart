@@ -40,8 +40,8 @@ googleSignIn.signIn();
             begin:Alignment.topRight,
             end:Alignment.bottomLeft,
             colors: [
-              Colors.teal,
-              Colors.purpleAccent
+              Theme.of(context).accentColor,
+              Theme.of(context).primaryColor
             ]
           ) ),
      child:Center(  
@@ -73,6 +73,7 @@ child: Column(
       ),
     );
   }
+  
   @override
  Widget build(BuildContext context) {
     return isAuth ? authenticated() : unauthenticated();
