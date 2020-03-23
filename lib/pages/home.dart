@@ -53,7 +53,10 @@ setState(() {
 });
   }
   onTap(int pageIndex) {
-   return pageController.jumpToPage(pageIndex);
+   return pageController.animateToPage(pageIndex,
+   duration: Duration(milliseconds: 300),
+   curve: Curves.bounceInOut
+   );
   }
   Widget authenticated() {
     return Scaffold(body: PageView(
@@ -72,7 +75,7 @@ setState(() {
       bottomNavigationBar: CupertinoTabBar(
         currentIndex:pageIndex,
         onTap:onTap,
-        activeColor: Theme.of(context).primaryColor,
+        activeColor: Theme.of(context).accentColor,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.whatshot)),
           BottomNavigationBarItem(icon: Icon(Icons.notifications_active)),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttershare/widgets/progress.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -15,6 +16,6 @@ class _SearchState extends State<Search> {
 class UserResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Text("User Result");
+    return linearProgress();
   }
 }

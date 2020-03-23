@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluttershare/widgets/header.dart';
+import 'package:fluttershare/widgets/progress.dart';
 
 class Upload extends StatefulWidget {
   @override
@@ -8,6 +10,8 @@ class Upload extends StatefulWidget {
 class _UploadState extends State<Upload> {
   @override
   Widget build(BuildContext context) {
-    return Text("Upload");
+    return Scaffold(
+    body:linearProgress()
+    );
   }
 }
