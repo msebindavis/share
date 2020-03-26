@@ -39,7 +39,11 @@ else {
     }
     );
   }  
-  
+@override
+void dispose() { 
+  pageController.dispose();
+  super.dispose();
+}  
   login() {
 googleSignIn.signIn();
   }
@@ -52,8 +56,8 @@ setState(() {
   this.pageIndex=pageIndex;
 });
   }
-  onTap(int pageIndex) {
-   return pageController.animateToPage(pageIndex,
+  onTap(int pIndex) {
+   return pageController.animateToPage(pIndex,
    duration: Duration(milliseconds: 300),
    curve: Curves.bounceInOut
    );
