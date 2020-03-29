@@ -1,13 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttershare/models/user.dart';
 import 'package:fluttershare/pages/activity_feed.dart';
+import 'package:fluttershare/pages/create_account.dart';
 import 'package:fluttershare/pages/profile.dart';
 import 'package:fluttershare/pages/search.dart';
 import 'package:fluttershare/pages/timeline.dart';
 import 'package:fluttershare/pages/upload.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+final  userRef = Firestore.instance.collection('users'); 
 final GoogleSignIn googleSignIn= new GoogleSignIn();
+final DateTime timestamp =DateTime.now();
+ User currentUser;
+
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -19,10 +26,23 @@ class _HomeState extends State<Home> {
   int pageIndex=0;
   @override
   void initState() { 
-    super.initState();
+    super.initState(); 
     pageController = PageController();
     googleSignIn.onCurrentUserChanged.listen((account) {
-if(account!=null) {
+     handleSignIn(account);
+    }  ,onError: (err) {
+      print('error signing in: $err');
+    }
+    );
+    googleSignIn.signInSilently(suppressErrors: false)
+    .then((account){
+      handleSignIn(account);
+    });
+  }
+  
+  handleSignIn(GoogleSignInAccount account)  {
+    if(account!=null) {
+      createUserInFirestore();
   setState(() {
     print('user signed in !:$account');
     isAuth=true;
@@ -31,14 +51,35 @@ if(account!=null) {
 else {
   setState(() {
     isAuth=false;
-  });
+  }
+
+  );
 }
 
-    },onError: (err) {
-      print('error signing in: $err');
-    }
-    );
-  }  
+  
+  }
+  createUserInFirestore() async {
+  final GoogleSignInAccount user = googleSignIn.currentUser;
+  DocumentSnapshot doc = await userRef.document(user.id).get();
+ if(!doc.exists) {
+final username= await Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateAccount()));
+
+
+userRef.document(user.id).setData({
+  "id":user.id,
+  "username":username,
+  "photourl":user.photoUrl,
+  "email":user.email,
+  "displayName":user.displayName,
+  "bio":"",
+  "timestamp":timestamp
+});
+doc = await userRef.document(user.id).get();
+ }
+ currentUser = User.fromDocument(doc);
+  }
+
+
 @override
 void dispose() { 
   pageController.dispose();
@@ -65,7 +106,15 @@ setState(() {
   Widget authenticated() {
     return Scaffold(body: PageView(
       children: <Widget>[
-        Timeline(),
+        //Timeline(),
+        RaisedButton(
+          
+      child:Text('logout',
+      style: TextStyle(
+        color: Colors.deepPurple,
+     ),
+     ),
+      onPressed:logout,),
         ActivityFeed(),
         Upload(),
         Search(),
@@ -90,11 +139,7 @@ setState(() {
           ],
           ),
           );
-    // return RaisedButton(
-    //   child:Text('logout',
-    //   style: TextStyle(color: Colors.deepPurple,
-    //  ),),
-    //   onPressed:logout,
+     
 
   }
   Scaffold unauthenticated() {
