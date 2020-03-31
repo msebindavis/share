@@ -7,12 +7,14 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'FlutterShare',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primaryColor: Colors.deepPurple,
+    
       accentColor: Colors.teal),
       home: Home(),
     );

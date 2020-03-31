@@ -50,6 +50,7 @@ class _HomeState extends State<Home> {
 }
 else {
   setState(() {
+    print('failed');
     isAuth=false;
   }
 
