@@ -49,6 +49,7 @@ final scaffoldKey = GlobalKey<ScaffoldState>();
             key:formKey ,
             child:Padding(padding:EdgeInsets.all(16) ,
               child:TextFormField(
+                
                 validator: (val) {
                   if(val.trim().length>12){
                     return "Username too long";

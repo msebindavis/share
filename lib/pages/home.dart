@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttershare/models/user.dart';
@@ -6,11 +7,12 @@ import 'package:fluttershare/pages/activity_feed.dart';
 import 'package:fluttershare/pages/create_account.dart';
 import 'package:fluttershare/pages/profile.dart';
 import 'package:fluttershare/pages/search.dart';
-import 'package:fluttershare/pages/timeline.dart';
 import 'package:fluttershare/pages/upload.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+final StorageReference storageRef = FirebaseStorage.instance.ref();
 final  userRef = Firestore.instance.collection('users'); 
+final  postRef = Firestore.instance.collection('posts'); 
 final GoogleSignIn googleSignIn= new GoogleSignIn();
 final DateTime timestamp =DateTime.now();
  User currentUser;
@@ -37,6 +39,8 @@ class _HomeState extends State<Home> {
     googleSignIn.signInSilently(suppressErrors: false)
     .then((account){
       handleSignIn(account);
+    }).catchError((err){
+       print('error signing in: $err');
     });
   }
   
@@ -117,14 +121,14 @@ setState(() {
      ),
       onPressed:logout,),
         ActivityFeed(),
-        Upload(),
+        Upload(currentUser:currentUser),
         Search(),
-        Profile()
+        Profile(profileId:currentUser?.id)
 
       ],
       controller: pageController,
       onPageChanged:onPageChanged,
-      physics:NeverScrollableScrollPhysics() ,
+     
       ),
       bottomNavigationBar: CupertinoTabBar(
         currentIndex:pageIndex,
@@ -188,6 +192,7 @@ child: Column(
   
   @override
  Widget build(BuildContext context) {
+  
     return isAuth ? authenticated() : unauthenticated();
   
   }
