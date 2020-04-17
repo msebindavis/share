@@ -125,7 +125,11 @@ class _PostState extends State<Post> {
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
-          cachedNetworkImage(mediaUrl),
+         CachedNetworkImage(
+        imageUrl: mediaUrl,
+        placeholder: (context, url) => circularProgress(),
+        errorWidget: (context, url, error) => Icon(Icons.error),
+     ),
         ],
       ),
     );
@@ -194,11 +198,11 @@ class _PostState extends State<Post> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      
       children: <Widget>[
         buildPostHeader(),
         buildPostImage(),
-        buildPostFooter()
+        buildPostFooter(),
       ],
     );
   }
