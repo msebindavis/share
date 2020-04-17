@@ -7,6 +7,7 @@ import 'package:fluttershare/pages/activity_feed.dart';
 import 'package:fluttershare/pages/create_account.dart';
 import 'package:fluttershare/pages/profile.dart';
 import 'package:fluttershare/pages/search.dart';
+import 'package:fluttershare/pages/timeline.dart';
 import 'package:fluttershare/pages/upload.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -111,15 +112,15 @@ setState(() {
   Widget authenticated() {
     return Scaffold(body: PageView(
       children: <Widget>[
-        //Timeline(),
-        RaisedButton(
+        Timeline(),
+    //     RaisedButton(
           
-      child:Text('logout',
-      style: TextStyle(
-        color: Colors.deepPurple,
-     ),
-     ),
-      onPressed:logout,),
+    //   child:Text('logout',
+    //   style: TextStyle(
+    //     color: Colors.deepPurple,
+    //  ),
+    //  ),
+    //   onPressed:logout,),
         ActivityFeed(),
         Upload(currentUser:currentUser),
         Search(),

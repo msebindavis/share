@@ -36,7 +36,7 @@ List<dynamic> users = [];
         }
         final List<Text> children = docs.data.documents
         .map((doc)
-           => Text(doc['userName'])
+           => Text(doc['username'])
         ).toList();
         return Container(
           child: ListView(
