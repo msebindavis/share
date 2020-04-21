@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttershare/widgets/custom_image.dart';
 import 'package:fluttershare/widgets/post.dart';
 import 'package:fluttershare/widgets/progress.dart';
 

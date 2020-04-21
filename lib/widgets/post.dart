@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttershare/models/user.dart';
+import 'package:fluttershare/pages/comments.dart';
 import 'package:fluttershare/pages/home.dart';
 import 'package:fluttershare/widgets/progress.dart';
 
@@ -79,7 +80,7 @@ class _PostState extends State<Post> {
   int likeCount;
   Map likes;
   bool isLiked;
-  bool showHeart;
+  bool showHeart=false;
 
   _PostState({
     this.postId,
@@ -91,13 +92,7 @@ class _PostState extends State<Post> {
     this.likes,
     this.likeCount,
   });
-@override
-void initState() { 
-  super.initState();
-  setState(() {
-    isLiked = likes[currentUserId]==true;
-  });
-}
+
   buildPostHeader() { 
     return FutureBuilder(
       future: userRef.document(ownerId).get(),
@@ -214,7 +209,12 @@ postLike(){
             ),
             Padding(padding: EdgeInsets.only(right: 20.0)),
             GestureDetector(
-              onTap: () => print('showing comments'),
+              onTap: () => showComments(
+                context,
+                postId:postId,
+                ownerId:ownerId,
+                mediaUrl:mediaUrl
+              ),
               child: Icon(
                 Icons.chat,
                 size: 28.0,
@@ -259,7 +259,7 @@ postLike(){
 
   @override
   Widget build(BuildContext context) {
-
+      isLiked = likes[currentUserId]==true;
     return Column(
       children: <Widget>[
         buildPostHeader(),
@@ -268,4 +268,14 @@ postLike(){
       ],
     );
   }
+}
+
+showComments(BuildContext context,{String postId,String ownerId,String mediaUrl}) {
+  Navigator.push(context, MaterialPageRoute(builder: (context){
+    return Comments(
+      postId:postId,
+      postOwnerId:ownerId,
+      postMediaUrl:mediaUrl,
+    );
+  }));
 }
