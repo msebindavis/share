@@ -25,9 +25,10 @@ postMediaUrl:this.postMediaUrl
 }
 
 class CommentsState extends State<Comments> {
-  TextEditingController commentController = TextEditingController();
-  final String postId;
-final  String postOwnerId;
+
+TextEditingController commentController = TextEditingController();
+final String postId;
+final String postOwnerId;
 final String postMediaUrl;
 
 CommentsState({
@@ -65,6 +66,22 @@ addComments() {
     'avatarUrl':currentUser.photourl,
     'userId':currentUser.id
   });
+   if(currentUser.id!=postOwnerId){
+  activityFeedRef
+  .document(postOwnerId)
+  .collection('feedItems')
+  .add({
+    "type":"comment",
+    'commentData':commentController.text,
+    "username":currentUser.username,
+    'userId':currentUser.id,
+    'userProfileImg':currentUser.photourl,
+    'postId':postId,
+    'mediaUrl':postMediaUrl,
+    'timestamp':timestamp
+  });
+   }
+
   commentController.clear();
 }
   @override
@@ -117,6 +134,7 @@ class Comment extends StatelessWidget {
       comment: doc['comment'],
       timestamp: doc['timestamp'],
       avatarUrl: doc['avatarUrl'],
+      
     );
   }
   @override

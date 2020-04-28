@@ -3,8 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttershare/models/user.dart';
-import 'package:fluttershare/pages/timeline.dart';
+import 'package:fluttershare/pages/profile.dart';
 import 'package:fluttershare/widgets/progress.dart';
+import 'package:fluttershare/pages/home.dart';
 
 
 class Search extends StatefulWidget {
@@ -12,8 +13,9 @@ class Search extends StatefulWidget {
   _SearchState createState() => _SearchState();
 }
 
-class _SearchState extends State<Search> {
+class _SearchState extends State<Search> with AutomaticKeepAliveClientMixin<Search> {
 
+TextEditingController searchController = TextEditingController();
 Future<QuerySnapshot> searchResults;
 
 submit(query)  {
@@ -27,6 +29,7 @@ AppBar searchWidget(){
 return AppBar(
   backgroundColor: Colors.white,
 title:TextFormField(
+  controller: searchController,
    decoration: InputDecoration(
     hintText:"Search a user",
     filled: true,
@@ -34,7 +37,7 @@ title:TextFormField(
       Icons.account_circle
     ),
     suffixIcon:IconButton(icon:Icon(Icons.clear),
-    onPressed:()=>print('cleared'))
+    onPressed:()=>searchController.clear())
   ),
  onFieldSubmitted:submit, 
 )
@@ -80,8 +83,10 @@ resultWidget() {
    );
  
 }
+bool get wantKeepAlive => true;
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Theme.of(context).accentColor.withOpacity(0.8),
       appBar: searchWidget(),
@@ -94,6 +99,11 @@ class UserResult extends StatelessWidget {
  final User user;
 
 UserResult(this.user);
+showProfile(context){
+Navigator.push(context, MaterialPageRoute(builder: (context)=>
+  Profile(profileId:user.id)
+  ));
+}
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -108,7 +118,7 @@ UserResult(this.user);
         ) ,
         title: Text(user.displayName,style: TextStyle(color: Colors.white),),
         subtitle: Text(user.username,style: TextStyle(color: Colors.white),),
-        onTap:()=>print('pressed'),),
+        onTap:()=>showProfile(context)),
         Divider(height: 2.0,color: Colors.white,)
     ],)
     );

@@ -103,7 +103,10 @@ _scaffoldKey.currentState.showSnackBar(snackBar);
   }
   logOut() async {
     await googleSignIn.signOut();
+  
     Navigator.push(context,MaterialPageRoute(builder: (context)=>Home()));
+    
+    
   }
   @override
   Widget build(BuildContext context) {

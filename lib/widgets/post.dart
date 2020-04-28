@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttershare/models/user.dart';
 import 'package:fluttershare/pages/comments.dart';
 import 'package:fluttershare/pages/home.dart';
+import 'package:fluttershare/pages/profile.dart';
+import 'package:fluttershare/widgets/header.dart';
 import 'package:fluttershare/widgets/progress.dart';
 
 class Post extends StatefulWidget {
@@ -17,6 +19,7 @@ class Post extends StatefulWidget {
   final String description;
   final String mediaUrl;
   final dynamic likes;
+  final bool isPage;
 
   Post({
     this.postId,
@@ -26,9 +29,10 @@ class Post extends StatefulWidget {
     this.description,
     this.mediaUrl,
     this.likes,
+    this.isPage
   });
 
-  factory Post.fromDocument(DocumentSnapshot doc) {
+  factory Post.fromDocument({DocumentSnapshot doc,bool isPage=false}) {
     return Post(
       postId: doc['postId'],
       ownerId: doc['ownerId'],
@@ -37,6 +41,7 @@ class Post extends StatefulWidget {
       description: doc['description'],
       mediaUrl: doc['mediaUrl'],
       likes: doc['likes'],
+      isPage:isPage
     );
   }
 
@@ -66,6 +71,7 @@ class Post extends StatefulWidget {
         mediaUrl: this.mediaUrl,
         likes: this.likes,
         likeCount: getLikeCount(this.likes),
+        isPage:this.isPage
       );
 }
 
@@ -81,6 +87,8 @@ class _PostState extends State<Post> {
   Map likes;
   bool isLiked;
   bool showHeart=false;
+  bool isPage;
+ 
 
   _PostState({
     this.postId,
@@ -91,8 +99,13 @@ class _PostState extends State<Post> {
     this.mediaUrl,
     this.likes,
     this.likeCount,
+    this.isPage
   });
-
+showProfile(context){
+Navigator.push(context, MaterialPageRoute(builder: (context)=>
+  Profile(profileId: ownerId)
+  ));
+}
   buildPostHeader() { 
     return FutureBuilder(
       future: userRef.document(ownerId).get(),
@@ -100,6 +113,7 @@ class _PostState extends State<Post> {
         if (!snapshot.hasData) {
           return circularProgress();
         }
+        bool isPostOwner = currentUserId == ownerId;
         User user = User.fromDocument(snapshot.data);
         return ListTile(
           leading: CircleAvatar(
@@ -107,7 +121,7 @@ class _PostState extends State<Post> {
             backgroundColor: Colors.grey,
           ),
           title: GestureDetector(
-            onTap: () => print('showing profile'),
+            onTap: () => showProfile(context),
             child: Text(
               user.username,
               style: TextStyle(
@@ -117,14 +131,77 @@ class _PostState extends State<Post> {
             ),
           ),
           subtitle: Text(location),
-          trailing: IconButton(
-            onPressed: () => print('deleting post'),
+          trailing: isPostOwner ? IconButton(
+            onPressed: () => handleDeletePost(context),
             icon: Icon(Icons.more_vert),
-          ),
+          ): Text(''),
         );
       },
     );
   }
+handleDeletePost(parentContext){
+ return showDialog(
+      context: parentContext,
+      builder: (context) {
+        return SimpleDialog(
+          title: Text("Remove this Post?"),
+          children: <Widget>[
+            SimpleDialogOption(
+                child: Text("Delete",style: TextStyle(color: Colors.red), ),
+                onPressed:() {
+                  Navigator.pop(context);
+                  deletePost();
+      }
+                   ),
+
+            SimpleDialogOption(
+              child: Text("Cancel"),
+              onPressed: () => Navigator.pop(context),
+            )
+          ],
+        );
+      },
+    );
+}
+deletePost(){
+ 
+ postRef
+ .document(currentUserId)
+ .collection('userPosts')
+ .document(postId)
+ .get()
+ .then((doc){
+ if(doc.exists){
+   doc.reference.delete();
+ }
+ });
+storageRef.child('post_$postId.jpg').delete();
+
+activityFeedRef
+.document(currentUserId)
+.collection('feedItems')
+.where('postId',isEqualTo:postId)
+.getDocuments()
+.then((docs){
+  docs.documents.forEach((doc){
+    if(doc.exists){
+      doc.reference.delete();
+    }
+  });
+});
+commentsRef
+.document(postId)
+.collection('comments')
+.getDocuments()
+.then((docs){
+  docs.documents.forEach((doc){
+     if(doc.exists){
+    doc.reference.delete();
+     }
+  });
+});
+
+}
 
   buildPostImage() {
     return GestureDetector(
@@ -163,6 +240,7 @@ postLike(){
    .updateData({
      'likes.$currentUserId':false
    });
+   removeLikeFromActivityFeed();
    setState(() {
      likeCount-=1;
      isLiked=false;
@@ -178,6 +256,7 @@ postLike(){
    .updateData({
      'likes.$currentUserId':true
    });
+   addLikeToActivityFeed();
    setState(() {
      likeCount+=1;
      isLiked=true;
@@ -192,6 +271,39 @@ postLike(){
      });
    });      
 }
+
+addLikeToActivityFeed(){
+  if(currentUserId!=ownerId){
+ activityFeedRef
+  .document(ownerId)
+  .collection('feedItems')
+  .document(postId)
+  .setData({
+    "type":"like",
+    "username":currentUser.username,
+    'userId':currentUser.id,
+    'userProfileImg':currentUser.photourl,
+    'postId':postId,
+    'mediaUrl':mediaUrl,
+    'timestamp':timestamp
+  });
+  }
+ 
+}
+removeLikeFromActivityFeed(){
+  if(currentUserId!=ownerId){
+     activityFeedRef
+  .document(ownerId)
+  .collection('feedItems')
+  .document(postId)
+  .get().then((onValue){
+    if(onValue.exists){
+      onValue.reference.delete();
+    }
+  });
+
+  }
+  }
   buildPostFooter() {
     return Column(
       children: <Widget>[
@@ -256,17 +368,35 @@ postLike(){
       ],
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-      isLiked = likes[currentUserId]==true;
-    return Column(
+pageSelector(){
+  if(isPage){
+    return Scaffold(
+      appBar: header(context,isTitle:true,title:'Post'),
+      body:ListView(
+      shrinkWrap: true,
       children: <Widget>[
         buildPostHeader(),
         buildPostImage(),
         buildPostFooter(),
       ],
+    ));
+  }
+  else{
+ return 
+        Column(
+        children: <Widget>[
+        buildPostHeader(),
+        buildPostImage(),
+        buildPostFooter(),
+      ],
     );
+  }
+}
+  @override
+  Widget build(BuildContext context) {
+      isLiked = likes[currentUserId]==true;
+     return pageSelector();
+    
   }
 }
 

@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,6 +16,10 @@ final StorageReference storageRef = FirebaseStorage.instance.ref();
 final  userRef = Firestore.instance.collection('users'); 
 final  postRef = Firestore.instance.collection('posts'); 
 final commentsRef = Firestore.instance.collection('comments'); 
+final activityFeedRef = Firestore.instance.collection('feeds');
+final followersRef = Firestore.instance.collection('followers'); 
+final followingRef = Firestore.instance.collection('following'); 
+final timelineRef = Firestore.instance.collection('timeline'); 
 final GoogleSignIn googleSignIn= new GoogleSignIn();
 final DateTime timestamp =DateTime.now();
  User currentUser;
@@ -25,6 +30,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   bool isAuth=false;
   PageController pageController;
   int pageIndex=0;
@@ -35,28 +42,29 @@ class _HomeState extends State<Home> {
     googleSignIn.onCurrentUserChanged.listen((account) {
      handleSignIn(account);
     }  ,onError: (err) {
-      print('error signing in: $err');
+     
     }
     );
     googleSignIn.signInSilently(suppressErrors: false)
     .then((account){
       handleSignIn(account);
     }).catchError((err){
-       print('error signing in: $err');
+      
     });
   }
   
-  handleSignIn(GoogleSignInAccount account)  {
+  handleSignIn(GoogleSignInAccount account) async {
     if(account!=null) {
-      createUserInFirestore();
+    await  createUserInFirestore();
   setState(() {
-    print('user signed in !:$account');
+   
     isAuth=true;
   });
+ 
 }
 else {
   setState(() {
-    print('failed');
+   
     isAuth=false;
   }
 
@@ -65,6 +73,8 @@ else {
 
   
   }
+
+  
   createUserInFirestore() async {
   final GoogleSignInAccount user = googleSignIn.currentUser;
   DocumentSnapshot doc = await userRef.document(user.id).get();
@@ -111,7 +121,9 @@ setState(() {
    );
   }
   Widget authenticated() {
-    return Scaffold(body: PageView(
+    return Scaffold(
+      key:_scaffoldKey,
+      body: PageView(
       children: <Widget>[
         Timeline(),
     //     RaisedButton(
@@ -121,7 +133,7 @@ setState(() {
     //     color: Colors.deepPurple,
     //  ),
     //  ),
-    //   onPressed:logout,),
+      // onPressed:logout,),
         ActivityFeed(),
         Upload(currentUser:currentUser),
         Search(),

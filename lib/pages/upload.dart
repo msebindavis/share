@@ -107,17 +107,17 @@ class _UploadState extends State<Upload>
   }
 
   compressImage() async {
-    final tempDir = await getTemporaryDirectory();
-    final path = tempDir.path;
-    Im.Image imageFile = Im.decodeImage(file.readAsBytesSync());
-    final compressedImageFile = File('$path/img_$postId.jpg')
-      ..writeAsBytesSync(Im.encodeJpg(imageFile, quality: 85));
-    setState(() {
-      file = compressedImageFile;
-    });
-  }
+      final tempDir = await getTemporaryDirectory();
+      final path = tempDir.path;
+      Im.Image imageFile = Im.decodeImage(file.readAsBytesSync());
+      final compressedImageFile = File('$path/img_$postId.jpg')
+        ..writeAsBytesSync(Im.encodeJpg(imageFile, quality: 85));
+      setState(() {
+        file = compressedImageFile;
+      });
+    }
 
-  Future<String> uploadImage(imageFile) async {
+Future<String> uploadImage(imageFile) async {
     StorageUploadTask uploadTask =
         storageRef.child("post_$postId.jpg").putFile(imageFile);
     StorageTaskSnapshot storageSnap = await uploadTask.onComplete;
@@ -276,9 +276,9 @@ class _UploadState extends State<Upload>
     List<Placemark> placemarks = await Geolocator()
         .placemarkFromCoordinates(position.latitude, position.longitude);
     Placemark placemark = placemarks[0];
-    String completeAddress =
-        '${placemark.subThoroughfare} ${placemark.thoroughfare}, ${placemark.subLocality} ${placemark.locality}, ${placemark.subAdministrativeArea}, ${placemark.administrativeArea} ${placemark.postalCode}, ${placemark.country}';
-    print(completeAddress);
+    // String completeAddress =
+    //     '${placemark.subThoroughfare} ${placemark.thoroughfare}, ${placemark.subLocality} ${placemark.locality}, ${placemark.subAdministrativeArea}, ${placemark.administrativeArea} ${placemark.postalCode}, ${placemark.country}';
+    
     String formattedAddress = "${placemark.locality}, ${placemark.country}";
     locationController.text = formattedAddress;
   }
